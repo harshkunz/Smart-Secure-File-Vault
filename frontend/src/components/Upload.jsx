@@ -46,20 +46,20 @@ const UploadPopup = () => {
 
         {/* File Preview */}
         <div className="flex justify-center mb-4 pt-2">
-          <div className="w-40 h-40 bg-gray-100 rounded flex items-center justify-center">
-            <FileText size={48} className="text-gray-600" />
+          <div className="w-40 h-40 bg-white hover:bg-green-100 rounded flex items-center justify-center">
+            <FileText size={60} className="text-gray-600" />
           </div>
         </div>
 
         {/* File Info */}
         {file && (
           <div className="space-y-2 text-sm">
-            <div className="flex items-center">
+            <div className="flex items-center pt-2">
               <span className="w-24 font-medium">Name:</span>
               <input
                 value={fileName}
                 onChange={(e) => setFileName(e.target.value)}
-                className="border p-1 rounded w-full"
+                className="border hover:bg-green-100 p-1 rounded-sm w-full"
               />
             </div>
             <div className="flex items-center">
@@ -71,7 +71,7 @@ const UploadPopup = () => {
               <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
             </div>
             {compressedSize && (
-              <div className="flex items-center">
+              <div className="flex items-center text-green-600 pt-2">
                 <span className="w-24 font-medium">Compressed:</span>
                 <span>{(compressedSize / (1024 * 1024)).toFixed(2)} MB</span>
               </div>
