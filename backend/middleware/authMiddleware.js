@@ -8,6 +8,10 @@ module.exports = async (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1];
+  if (!token) {
+      return res.status(401).json({ message: "Access denied. No token provided." });
+  }
+  
 
   try {
     // Check if token is blacklisted

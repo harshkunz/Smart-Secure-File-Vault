@@ -25,17 +25,35 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Please provide email and password" });
+    }
+
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "Invalid credentials" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+        return res.status(401).json({ message: "Invalid email or password" });
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.status(200).json({
-      msg: "Login successful",
-      token: token
+    // Create and assign token
+    const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+    );
+
+    res.header('auth-token', token).json({
+        token,
+        user: {
+            id: user._id,
+            email: user.email,
+            name: user.name
+        }
     });
+    res.status(201).json({ msg: "Login successful..." });
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }

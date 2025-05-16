@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaHome, FaSignInAlt, FaUserPlus, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaSignInAlt, FaUserPlus, FaSignOutAlt, FaUser } from 'react-icons/fa';
 
 const Navbar = ({ isLoggedIn, handleLogout }) => {
   return (
@@ -9,26 +9,27 @@ const Navbar = ({ isLoggedIn, handleLogout }) => {
         <FaHome size={20} />
       </Link>
 
-      {!isLoggedIn ? (
+      {!!isLoggedIn ? (
         <>
           <Link to="/login" className="text-white flex items-center space-x-1 hover:text-blue-300">
             <FaSignInAlt size={20} />
             <span className='text-sm'>Login</span>
           </Link>
-
-          <Link to="/register" className="text-white flex items-center space-x-1 hover:text-blue-300">
-            <FaUserPlus size={20} />
-            <span className='text-sm'>Register</span>
-          </Link>
         </>
       ) : (
-        <button
-          onClick={handleLogout}
-          className="text-white flex items-center space-x-1 hover:text-blue-300 rounded"
-        >
-          <FaSignOutAlt size={20} />
-          <span className='text-sm'>Logout</span>
-        </button>
+        <>
+          <Link to="/profile" className="text-white flex items-center space-x-1 hover:text-blue-300">
+              <FaUser size={18} />
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-white flex items-center space-x-1 hover:text-blue-300 rounded"
+          >
+            <FaSignOutAlt size={20} />
+            <span className='text-sm'>Logout</span>
+          </button>
+        </>
+        
       )}
     </nav>
   );
