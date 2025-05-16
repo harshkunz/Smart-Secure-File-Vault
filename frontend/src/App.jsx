@@ -13,6 +13,9 @@ const App = () => {
       <Router>
         <Navbar/>
         <Routes>
+          {/* Ui checking routes */}
+          <Route path="/ui" element={<Upload />} />
+
           {/* Public Routes */}
           <Route path="/" element={<DashBoard />} />
           <Route path="/register" element={<Register />} />
