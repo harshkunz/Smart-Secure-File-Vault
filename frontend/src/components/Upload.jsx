@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Lock,
   FileText,
@@ -6,13 +6,25 @@ import {
   CloudUpload,
   FileArchive
 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 const UploadPopup = () => {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
+  const location = useLocation();
+  const initialFile = location.state?.file || null;
+
+  const [file, setFile] = useState(initialFile);
+  const [fileName, setFileName] = useState(initialFile?.name || "");
   const [compressedSize, setCompressedSize] = useState(null);
   const [encrypted, setEncrypted] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef();
+
+  useEffect(() => {
+    if (initialFile) {
+      setFile(initialFile);
+      setFileName(initialFile.name);
+    }
+  }, [initialFile]);
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
@@ -36,7 +48,11 @@ const UploadPopup = () => {
   };
 
   const handleUpload = () => {
-    alert("Mock upload - UI only");
+    setUploading(true);
+    setTimeout(() => {
+      alert("Mock upload - UI only");
+      setUploading(false);
+    }, 1500);
   };
 
   return (
@@ -44,15 +60,13 @@ const UploadPopup = () => {
       <div className="bg-gray-200 p-6 shadow-md rounded-sm w-full max-w-md">
         <h2 className="text-2xl font-semibold text-center mb-4">Upload File</h2>
 
-        {/* File Preview */}
         <div className="flex justify-center mb-4 pt-2">
           <div className="w-40 h-40 bg-white hover:bg-green-100 rounded flex items-center justify-center">
             <FileText size={60} className="text-gray-600" />
           </div>
         </div>
 
-        {/* File Info */}
-        {file && (
+        {file ? (
           <div className="space-y-2 text-sm">
             <div className="flex items-center pt-2">
               <span className="w-24 font-medium">Name:</span>
@@ -83,31 +97,33 @@ const UploadPopup = () => {
               </div>
             )}
           </div>
+        ) : (
+          <p className="text-center text-sm text-red-500">No file selected.</p>
         )}
 
-        {/* Buttons */}
         <div className="mt-6 space-y-3">
-          {/* Compress + Encrypt */}
           <div className="flex gap-2 justify-center pt-2">
             <button
               onClick={handleCompress}
               className="flex items-center gap-2 bg-yellow-500 hover:bg-blue-700 text-white px-3 py-2 rounded-sm"
+              disabled={!file || uploading}
             >
               <FileArchive size={18} /> Compress
             </button>
             <button
               onClick={handleEncrypt}
               className="flex items-center gap-2 bg-red-500 hover:bg-blue-700 text-white px-3 py-2 rounded-sm"
+              disabled={!file || uploading}
             >
               <Lock size={18} /> Encrypt
             </button>
           </div>
 
-          {/* Re-upload */}
           <div className="flex justify-center pt-2">
             <button
               onClick={() => fileInputRef.current.click()}
               className="flex items-center gap-2 bg-gray-400 hover:bg-blue-700 text-white px-4 py-2 rounded-sm"
+              disabled={uploading}
             >
               <Repeat size={18} /> Re-upload
             </button>
@@ -119,13 +135,14 @@ const UploadPopup = () => {
             />
           </div>
 
-          {/* Upload to cloud */}
           <div className="flex justify-center pt-2">
             <button
               onClick={handleUpload}
               className="flex items-center gap-2 bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded-sm"
+              disabled={!file || uploading}
             >
-              <CloudUpload size={18} /> Upload to Cloud
+              <CloudUpload size={18} />
+              {uploading ? "Uploading..." : "Upload to Cloud"}
             </button>
           </div>
         </div>
