@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
+import api from '../api/axios';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,11 +19,14 @@ const Login = () => {
     setError('');
 
     try {
-      const res = await axios.post('/auth/login', form);
+      const res = await api.post('/auth/login', form);
+
       if (res.status === 200) {
-        // Save token or user data if needed
-        navigate('/');
+        const { token, user } = res.data;
+        login({ token, ...user });  
+        navigate(location.state?.from || '/');
       }
+      
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed');
     }

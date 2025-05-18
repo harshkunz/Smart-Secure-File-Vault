@@ -5,8 +5,18 @@ const instance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // if your backend uses cookies or sessions
 });
 
-// You can add interceptors here if you want to attach tokens or handle errors globally
+// Add a request interceptor to attach token on every request
+instance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export default instance;

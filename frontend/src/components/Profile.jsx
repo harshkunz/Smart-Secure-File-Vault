@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/axios";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -11,13 +11,14 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get("/auth/profile", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        setUser(res.data);
-        setEditableUser({ name: res.data.name, email: res.data.email });
+        const res = await api.get("/auth/profile");
+
+        if (res.status == 200) {
+          const { name, email } = res.data;
+          setUser(res.data);
+          setEditableUser({ name, email });
+        }
+
       } catch (err) {
         setError("Failed to load profile");
       }
@@ -33,21 +34,19 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const res = await axios.put(
-        "/auth/profile",
-        { name: editableUser.name, email: editableUser.email },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const res = await api.put("/auth/profile", {
+        name: editableUser.name,
+        email: editableUser.email,
+      });
+
       setUser(res.data);
+      setEditableUser(res.data); // Update editableUser with the new data 
       setEditMode(false);
       setSuccess("Profile updated!");
       setTimeout(() => setSuccess(""), 2000);
+
     } catch (err) {
-      setError("Update failed.");
+      setError(err.response?.data?.msg || "Update failed.");
     }
   };
 
@@ -72,7 +71,7 @@ const Profile = () => {
                   className="border px-2 py-1 rounded-sm w-full max-w-xs"
                 />
               ) : (
-                <span className="text-gray-900">{"Harsh Pratap"}</span>
+                <span className="text-gray-900">{user.name}</span>
               )}
             </div>
 
@@ -87,7 +86,7 @@ const Profile = () => {
                   className="border px-2 py-1 rounded-sm w-full max-w-xs"
                 />
               ) : (
-                <span className="text-gray-900">{"xyz@gmial.com"}</span>
+                <span className="text-gray-900">{user.email}</span>
               )}
             </div>
 
