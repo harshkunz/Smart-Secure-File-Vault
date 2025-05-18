@@ -6,6 +6,7 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Upload from "./components/Upload";
 import Navbar from './components/Navbar';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 const App = () => {
   
@@ -13,18 +14,32 @@ const App = () => {
       <Router>
         <Navbar/>
         <Routes>
-          {/* Ui checking routes */}
-          <Route path="/ui" element={<Upload />} />
+          {/* checking under-developing routes */}
+          
 
           {/* Public Routes */}
           <Route path="/" element={<DashBoard />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-
-          {/* Protected Routes (you can later wrap them in auth logic) */}
-          <Route path="/profile" element={<Profile />} />
           <Route path="/upload" element={<Upload />} />
-          <Route path="/files" element={<FilesPage />} />
+
+          {/* Protected Routes */}
+          <Route 
+            path="/profile" 
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/files" 
+            element={
+              <ProtectedRoute>
+                <FilesPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
   );
