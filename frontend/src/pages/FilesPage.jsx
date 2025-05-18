@@ -34,7 +34,7 @@ export default function FilesPage() {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 sm:px-8 lg:px-16">
       {/* Search Bar */}
       <div className="mb-4 px-8 py-2 flex gap-2">
         <input
@@ -54,7 +54,7 @@ export default function FilesPage() {
       <h2 className="text-2xl font-semibold text-center mb-4">User Files</h2>
 
       {/* Files List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4 py-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 px-8 py-2">
         {files
           .filter((file) =>
             file.name.toLowerCase().includes(search.toLowerCase())
@@ -64,25 +64,25 @@ export default function FilesPage() {
               key={file.id}
               className="border rounded p-4 flex flex-col items-center text-center shadow rounded-lg hover:bg-purple-100"
             >
-              <div className="border-2 p-8 h-16 mb-2 flex items-center justify-center rounded-full hover:bg-green-200">
+              <div className="border-2 p-8 mt-4 h-16 mb-4 flex items-center justify-center rounded-full hover:bg-green-200">
                 {getIcon(file.name)}
               </div>
               <span className="font-medium">{file.name}</span>
               <div className="flex gap-2 mt-4">
                 <button className="bg-gray-300 mx-1 hover:bg-blue-600 text-black text-sm px-2 py-1 rounded-sm">
-                  <Eye size={20} />
+                  <Eye size={20} /> {/* Prev */}
                 </button>
                 <button className="bg-green-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm">
-                  <Download size={20} />
+                  <Download size={20} /> {/* Download */}
                 </button>
                 <button
                   onClick={() => handleDelete(file.id)}
                   className="bg-red-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm"
                 >
-                  <Trash2 size={20} />
+                  <Trash2 size={20} /> {/* Delete */}
                 </button>
                 <button className="bg-purple-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm">
-                  <Share2 size={20} />
+                  <Share2 size={20} /> {/* Share */}
                 </button>
               </div>
             </div>
