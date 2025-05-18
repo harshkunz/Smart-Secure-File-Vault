@@ -3,20 +3,43 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import fileImage from "../assets/fileImage.png";
 
-export default function DashboardX() {
+const Dashboard = () => {
   const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 50 * 1024 * 1024) {
+        alert("File size exceeds 50MB limit");
+        return;
+      }
       setLoading(true);
       setTimeout(() => {
         setLoading(false);
-        navigate("/ui", { state: { file } }); // Pass file via router state
+        navigate("/upload", { state: { file } });
       }, 1500);
     }
+  };
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileChange({ target: { files: [file] } });
   };
 
   const triggerFileInput = () => fileInputRef.current?.click();
@@ -26,7 +49,14 @@ export default function DashboardX() {
       <h1 className="text-4xl font-medium mb-2 pt-8">Done! You're on Dashboard</h1>
       <h2 className="text-lg text-gray-600 mb-6 pt-2">Please follow the conditions below</h2>
 
-      <div className="border border-dashed border-gray-400 p-6 rounded-lg text-center space-y-6">
+      <div className={`border border-dashed ${dragActive ? 'border-green-500 bg-green-50' : 'border-gray-400'}
+        p-6 rounded-lg text-center space-y-6 transition-all duration-200`}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+      >
+
         <div className="flex justify-center">
           <img src={fileImage} alt="File" className="mx-auto h-44" />
         </div>
@@ -41,9 +71,12 @@ export default function DashboardX() {
 
         <button
           onClick={triggerFileInput}
-          className="flex items-center gap-2 justify-center bg-green-500 hover:bg-blue-700 text-white px-4 py-4 mb-8 rounded-full mx-auto 
+          className={`flex items-center gap-2 justify-center bg-green-500
+              hover:bg-blue-700 text-white px-4 py-4 mb-8 rounded-full mx-auto 
               transition-shadow duration-200 ease-in-out 
-              hover:shadow-[0_0_20px_6px_rgba(59,130,246,0.6)]"
+              hover:shadow-[0_0_20px_6px_rgba(59,130,246,0.6)]
+              ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={loading}
         >
           <Plus size={30} />
         </button>
@@ -55,10 +88,12 @@ export default function DashboardX() {
         )}
 
         <div className="text-gray-500 py-2">
-          <p>Choose or drop your file here</p>
-          <p className="text-sm mt-1">Max. 50 MB</p>
+          <p>Drag & drop or choose your file</p>
+          <p className="text-sm mt-1">Maximum file size: 50 MB</p>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
