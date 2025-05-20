@@ -1,28 +1,37 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from 'react';
+import api from '../api/axios';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+            api.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+        }
+        setLoading(false);
+    }, []);
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+    const login = (userData) => {
+        localStorage.setItem('user', JSON.stringify(userData));
+        api.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
+        setUser(userData);
+    };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
-      {children}
-    </AuthContext.Provider>
-  );
+    const logout = () => {
+        localStorage.removeItem('user');
+        delete api.defaults.headers.common['Authorization'];
+        setUser(null);
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, login, logout, loading }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
-
-export { AuthContext };

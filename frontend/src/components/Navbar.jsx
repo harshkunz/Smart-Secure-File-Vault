@@ -14,7 +14,6 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await api.post('/auth/logout');
       logout();
       navigate('/');
     } catch (err) {

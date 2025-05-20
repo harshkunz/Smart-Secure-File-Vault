@@ -8,6 +8,9 @@ import {
   FileText,
   Image,
   Film,
+  FileArchive,
+  Lock,
+  Unlock
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import api from "../api/axios";
@@ -18,6 +21,8 @@ export default function FilesPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const [activeFile, setActiveFile] = useState(null);
 
   // Fetch user files
   useEffect(() => {
@@ -46,27 +51,82 @@ export default function FilesPage() {
     }
   };
 
-  // Handle file download
-  const handleDownload = async (id, filename) => {
+  // Handle compression/decompression
+  const handleCompression = async (file) => {
     try {
-      const response = await api.get(`/files/${id}`, {
+      setProcessing(true);
+      setActiveFile(file._id);
+      const endpoint = file.compressed ? 'decompress' : 'compress';
+      await api.post(`/files/${endpoint}/${file._id}`);
+      const response = await api.get('/files');
+      setFiles(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || `Failed to ${file.compressed ? 'decompress' : 'compress'} file`);
+    } finally {
+      setProcessing(false);
+      setActiveFile(null);
+    }
+  };
+
+  // Handle encryption/decryption
+  const handleEncryption = async (file) => {
+    try {
+      setProcessing(true);
+      setActiveFile(file._id);
+      const endpoint = file.encrypted ? 'decrypt' : 'encrypt';
+      await api.post(`/files/${endpoint}/${file._id}`);
+      const response = await api.get('/files');
+      setFiles(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || `Failed to ${file.encrypted ? 'decrypt' : 'encrypt'} file`);
+    } finally {
+      setProcessing(false);
+      setActiveFile(null);
+    }
+  };
+
+  // Handle file download
+  const handleDownload = async (file) => {
+    try {
+      setProcessing(true);
+      setActiveFile(file._id);
+
+      let currentFile = file;
+
+      // Decompress if needed
+      if (file.compressed) {
+        await handleCompression(file);
+        const updatedFile = files.find(f => f._id === file._id);
+        if (updatedFile) currentFile = updatedFile;
+      }
+
+      // Decrypt if needed
+      if (file.encrypted) {
+        await handleEncryption(currentFile);
+        const updatedFile = files.find(f => f._id === file._id);
+        if (updatedFile) currentFile = updatedFile;
+      }
+
+      const response = await api.get(`/files/${file._id}`, {
         responseType: 'blob'
       });
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', filename);
+      link.setAttribute('download', file.name);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to download file");
+    } finally {
+      setProcessing(false);
+      setActiveFile(null);
     }
   };
 
-  //getIcon function...
   const getIcon = (fileName) => {
     const ext = fileName.split(".").pop().toLowerCase();
     if (ext === "pdf") return <FileText size={40} />;
@@ -77,7 +137,6 @@ export default function FilesPage() {
 
   return (
     <div className="p-4 sm:px-8 lg:px-16">
-      {/* Search Bar */}
       <div className="mb-4 px-8 py-2 flex gap-2">
         <input
           type="text"
@@ -114,26 +173,56 @@ export default function FilesPage() {
                     {getIcon(file.name)}
                   </div>
                   <span className="font-medium">{file.name}</span>
+                  {file.compressed && (
+                    <span className="text-yellow-600 text-sm">Compressed</span>
+                  )}
+                  {file.encrypted && (
+                    <span className="text-red-600 text-sm">Encrypted</span>
+                  )}
                   <div className="flex gap-2 mt-4">
                     <button 
                       className="bg-gray-300 mx-1 hover:bg-blue-600 text-black text-sm px-2 py-1 rounded-sm"
                       onClick={() => window.open(`${api.defaults.baseURL}/files/preview/${file._id}`)}
+                      disabled={processing && activeFile === file._id}
                     >
                       <Eye size={20} />
                     </button>
                     <button 
                       className="bg-green-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm"
-                      onClick={() => handleDownload(file._id, file.name)}
+                      onClick={() => handleDownload(file)}
+                      disabled={processing && activeFile === file._id}
                     >
                       <Download size={20} />
                     </button>
                     <button
+                      onClick={() => handleCompression(file)}
+                      className={`mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm ${
+                        file.compressed ? 'bg-blue-500' : 'bg-yellow-500'
+                      }`}
+                      disabled={processing && activeFile === file._id}
+                    >
+                      <FileArchive size={20} />
+                    </button>
+                    <button
+                      onClick={() => handleEncryption(file)}
+                      className={`mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm ${
+                        file.encrypted ? 'bg-blue-500' : 'bg-red-500'
+                      }`}
+                      disabled={processing && activeFile === file._id}
+                    >
+                      {file.encrypted ? <Unlock size={20} /> : <Lock size={20} />}
+                    </button>
+                    <button
                       onClick={() => handleDelete(file._id)}
                       className="bg-red-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm"
+                      disabled={processing && activeFile === file._id}
                     >
                       <Trash2 size={20} />
                     </button>
-                    <button className="bg-purple-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm">
+                    <button 
+                      className="bg-purple-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm"
+                      disabled={processing && activeFile === file._id}
+                    >
                       <Share2 size={20} />
                     </button>
                   </div>

@@ -8,8 +8,10 @@ const {
   getUserFiles,
   getFile,
   deleteFile,
+  compressFile,
+  decompressFile,
   encryptFile,
-  decryptFile,
+  decryptFile
 } = require('../controllers/fileController');
 
 
@@ -29,10 +31,17 @@ const upload = multer({
 });
 
 
+// File operations
 router.post('/upload', auth, upload.single('file'), uploadFile);
 router.get('/', auth, getUserFiles);
 router.get('/:id', auth, getFile);
 router.delete('/:id', auth, deleteFile);
+
+// Compression operations
+router.post('/compress/:id', auth, compressFile);
+router.post('/decompress/:id', auth, decompressFile);
+
+// Encryption operations
 router.post('/encrypt/:id', auth, encryptFile);
 router.post('/decrypt/:id', auth, decryptFile);
 
