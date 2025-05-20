@@ -15,7 +15,8 @@ const App = () => {
         <Navbar/>
         <Routes>
           {/* checking under-developing routes */}
-          
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/userfiles" element={<FilesPage />} />
 
           {/* Public Routes */}
           <Route path="/" element={<Template />} />
@@ -24,22 +25,7 @@ const App = () => {
           <Route path="/upload" element={<Upload />} />
 
           {/* Protected Routes */}
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/files" 
-            element={
-              <ProtectedRoute>
-                <FilesPage />
-              </ProtectedRoute>
-            }
-          />
+          
         </Routes>
       </Router>
   );

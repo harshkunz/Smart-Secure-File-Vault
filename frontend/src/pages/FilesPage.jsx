@@ -13,7 +13,7 @@ import {
   Unlock
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
-import api from "../api/axios";
+import axios from "axios";
 
 export default function FilesPage() {
   const { user } = useContext(AuthContext);
@@ -28,7 +28,9 @@ export default function FilesPage() {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await api.get('/files');
+        
+        await axios.get("http://localhost:5000/files", { withCredentials: true });
+        console.log(res);
         setFiles(response.data);
         setError("");
       } catch (err) {
