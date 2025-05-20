@@ -24,7 +24,7 @@ const FileSchema = new mongoose.Schema({
   },
   encryptionStatus: {
     type: Boolean,
-    default: true,  // File is encrypted by default
+    default: true,
   },
   dateUploaded: {
     type: Date,

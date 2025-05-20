@@ -1,7 +1,10 @@
 const File = require("../models/File");
 const fs = require("fs");
 const path = require("path");
-const { spawn } = require("child_process");
+const CompressionService = require("../services/compress");
+const DecompressionService = require("../services/decompress");
+const EncryptionService = require("../services/encrypt");
+const DecryptionService = require("../services/decrypt");
 
 // Upload File
 exports.uploadFile = async (req, res) => {
@@ -64,7 +67,62 @@ exports.deleteFile = async (req, res) => {
   }
 };
 
-// Encrypt file using C++ module
+
+// Compress file
+exports.compressFile = async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file || file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ msg: "Access denied" });
+    }
+
+    const result = await CompressionService.compressFile(file.fileUrl);
+    if (!result.success) {
+      return res.status(500).json({ msg: result.error });
+    }
+
+    // Update file record
+    file.fileUrl = result.compressedPath;
+    file.fileSize = result.compressedSize;
+    await file.save();
+
+    res.json({
+      msg: "File compressed successfully",
+      compressedSize: result.compressedSize
+    });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+// Decompress file
+exports.decompressFile = async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file || file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ msg: "Access denied" });
+    }
+
+    const result = await DecompressionService.decompressFile(file.fileUrl);
+    if (!result.success) {
+      return res.status(500).json({ msg: result.error });
+    }
+
+    // Update file record
+    file.fileUrl = result.decompressedPath;
+    file.fileSize = result.decompressedSize;
+    await file.save();
+
+    res.json({
+      msg: "File decompressed successfully",
+      decompressedSize: result.decompressedSize
+    });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
+
+// Encrypt file
 exports.encryptFile = async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
@@ -72,18 +130,23 @@ exports.encryptFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied" });
     }
 
-    const encrypt = spawn("../cpp_module/encrypt", [file.fileUrl]);
-    encrypt.on("close", async () => {
-      file.encryptionStatus = true;
-      await file.save();
-      res.json({ msg: "File encrypted successfully" });
-    });
+    const result = await EncryptionService.encryptFile(file.fileUrl);
+    if (!result.success) {
+      return res.status(500).json({ msg: result.error });
+    }
+
+    // Update file record
+    file.fileUrl = result.encryptedPath;
+    file.encryptionStatus = true;
+    await file.save();
+
+    res.json({ msg: "File encrypted successfully" });
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
 
-// Decrypt file using C++ module
+// Decrypt file
 exports.decryptFile = async (req, res) => {
   try {
     const file = await File.findById(req.params.id);
@@ -91,12 +154,17 @@ exports.decryptFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied" });
     }
 
-    const decrypt = spawn("../cpp_module/decrypt", [file.fileUrl]);
-    decrypt.on("close", async () => {
-      file.encryptionStatus = false;
-      await file.save();
-      res.json({ msg: "File decrypted successfully" });
-    });
+    const result = await DecryptionService.decryptFile(file.fileUrl);
+    if (!result.success) {
+      return res.status(500).json({ msg: result.error });
+    }
+
+    // Update file record
+    file.fileUrl = result.decryptedPath;
+    file.encryptionStatus = false;
+    await file.save();
+
+    res.json({ msg: "File decrypted successfully" });
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }

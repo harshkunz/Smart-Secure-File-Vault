@@ -1,30 +1,28 @@
 const jwt = require("jsonwebtoken");
+const userModel = require("../models/user");
 const BlacklistedToken = require("../models/BlacklistedToken");
 
+
 module.exports = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ msg: "No token provided" });
+  
+  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+  if(!token) {
+    return res.status(401).json({ msg: 'Unauthorized' });
   }
 
-  const token = authHeader.split(" ")[1];
-  if (!token) {
-      return res.status(401).json({ message: "Access denied. No token provided." });
+  const isBlacklisted = await BlacklistedToken.findOne({ token : token });
+  if (isBlacklisted) {
+    return res.status(401).json({ message: 'Unauthorized access login again!' });
   }
-  
 
   try {
-    // Check if token is blacklisted
-    const blacklisted = await BlacklistedToken.findOne({ token });
-    if (blacklisted) {
-      return res.status(403).json({ msg: "Token has been revoked" });
-    }
-
-    // Verify JWT token
+    
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
+    const user = await userModel.findById(decoded.id) 
+    req.user = user;
+    return next();
+
   } catch (err) {
-    return res.status(403).json({ msg: "Invalid or expired token" });
+    return res.status(403).json({ msg: 'Unauthorized' });
   }
 };

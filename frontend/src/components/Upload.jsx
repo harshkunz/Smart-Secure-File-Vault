@@ -58,10 +58,10 @@ const Upload = () => {
 
   const handleCompress = async () => {
     if (!file) {
-      setError('Compression failed. Please select a file to compress');
+      setError('Please select a file to compress');
       return;
     }
-    if(!user) {
+    if (!user) {
       setError('Please login to compress files');
       return;
     }
@@ -71,11 +71,27 @@ const Upload = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('userId', user._id);
+      formData.append('fileName', fileName);
+      
+      // Single request to compress file
+      const response = await api.post('/files/compress', formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${user.token}` // Add auth token
+        }
+      });
 
-      const res = await api.post(`/files/compress/${user._id}`, formData);
-      setCompressedSize(res.data.compressedSize);
+      if (response.data && response.data.compressedSize) {
+        setCompressedSize(response.data.compressedSize);
+        // Update file with compressed version if returned
+        if (response.data.file) {
+          setFile(new Blob([response.data.file], { type: file.type }));
+        }
+      } else {
+        throw new Error('Compression failed');
+      }
     } catch (err) {
+      console.error('Compression error:', err);
       setError(err.response?.data?.message || 'Compression failed');
     } finally {
       setIsCompressing(false);
@@ -84,10 +100,10 @@ const Upload = () => {
 
   const handleEncrypt = async () => {
     if (!file) {
-      setError('Encryption failed. Please select a file to encrypt');
+      setError('Please select a file to encrypt');
       return;
     }
-    if(!user) {
+    if (!user) {
       setError('Please login to encrypt files');
       return;
     }
@@ -97,11 +113,27 @@ const Upload = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('userId', user._id);
+      formData.append('fileName', fileName);
+      
+      // Single request to encrypt file
+      const response = await api.post('/files/encrypt', formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${user.token}` // Add auth token
+        }
+      });
 
-      const res = await api.post(`/files/encrypt/${user._id}`, formData);
-      setEncrypted(res.data.encrypted);
+      if (response.data && response.data.success) {
+        setEncrypted(true);
+        // Update file with encrypted version if returned
+        if (response.data.file) {
+          setFile(new Blob([response.data.file], { type: file.type }));
+        }
+      } else {
+        throw new Error('Encryption failed');
+      }
     } catch (err) {
+      console.error('Encryption error:', err);
       setError(err.response?.data?.message || 'Encryption failed');
     } finally {
       setIsEncrypting(false);
@@ -110,10 +142,10 @@ const Upload = () => {
 
   const handleUpload = async () => {
     if (!file) {
-      setError('Uploading failed. Please select a file to upload');
+      setError('Please select a file to upload');
       return;
     }
-    if(!user) {
+    if (!user) {
       setError('Please login to upload files');
       return;
     }
@@ -124,16 +156,13 @@ const Upload = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileName', fileName);
-      formData.append('userId', user._id);
-      formData.append('fileSize', file.size);
-      formData.append('fileType', file.type);
+      formData.append('compressed', Boolean(compressedSize));
+      formData.append('encrypted', encrypted);
 
-      if (compressedSize) formData.append('compressed', true);
-      if (encrypted) formData.append('encrypted', true);
-
-      const res = await api.post('/files/upload', formData, {
+      const response = await api.post('/files/upload', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${user.token}` // Add auth token
         },
         onUploadProgress: (progressEvent) => {
           const progress = Math.round(
@@ -143,14 +172,14 @@ const Upload = () => {
         }
       });
 
-      if (res.status === 200) {
+      if (response.data && response.data.success) {
         navigate('/files');
+      } else {
+        throw new Error(response.data?.message || 'Upload failed');
       }
- 
     } catch (err) {
-      setError(err.response?.data?.message || 
-        err.response?.data?.msg || 
-        'Upload failed. Please try again.');
+      console.error('Upload error:', err);
+      setError(err.response?.data?.message || 'Upload failed');
     } finally {
       setUploading(false);
       setUploadProgress(0);

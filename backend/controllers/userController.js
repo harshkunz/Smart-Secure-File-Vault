@@ -1,6 +1,4 @@
 exports.getProfile = async (req, res) => {
-  res.status(200).json({
-      msg: "successfully fetched user",
-      user: req.user
-    });
+  const user = req.user;
+  res.status(200).json({ success:true, user });
 };
