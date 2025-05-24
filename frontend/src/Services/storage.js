@@ -1,7 +1,5 @@
 export const saveFileState = (fileState) => {
-  sessionStorage.setItem('uploadFileState', JSON.stringify({
-    
-  }));
+  sessionStorage.setItem('uploadFileState', JSON.stringify({}));
 };
 
 export const getFileState = () => {
