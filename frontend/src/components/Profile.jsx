@@ -1,33 +1,18 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState, useContext } from "react";
+import { UserData } from '../context/UserContext';
+import axios from 'axios';
+
+const BASE_URL = "http://localhost:5000";
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
+  const { user: User, setUser: setUser } = useContext(UserData);
   const [editMode, setEditMode] = useState(false);
-  const [editableUser, setEditableUser] = useState({ name: "", email: "" });
+  const [editableUser, setEditableUser] = useState({
+    name: User?.name || "",
+    email: User?.email || ""
+  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/user/profile", {
-          withCredentials: true,});
-          console.log(res.error);
-
-        if (res.status == 200) {
-          const { name, email } = res.data;
-          setUser(res.data);
-          setEditableUser({ name, email });
-        }
-
-      } catch (err) {
-        setError("Failed to load profile");
-      }
-    };
-
-    fetchProfile();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,17 +21,22 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const res = await api.put("/auth/profile", {
+      const res = await axios.put(`${BASE_URL}/user/profile`, {
         name: editableUser.name,
         email: editableUser.email,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
       });
 
-      setUser(res.data);
-      setEditableUser(res.data); // Update editableUser with the new data 
+      setUser(res.data.data);
+      setEditableUser(res.data.data);
       setEditMode(false);
       setSuccess("Profile updated!");
       setTimeout(() => setSuccess(""), 2000);
-
     } catch (err) {
       setError(err.response?.data?.msg || "Update failed.");
     }
@@ -60,7 +50,9 @@ const Profile = () => {
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
 
-        {user ? (
+        {!User ? (
+          <p className="text-center text-red-500">Please login to view profile</p>
+        ) : (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600 font-medium w-24">Name:</span>
@@ -73,7 +65,7 @@ const Profile = () => {
                   className="border px-2 py-1 rounded-sm w-full max-w-xs"
                 />
               ) : (
-                <span className="text-gray-900">{user.name}</span>
+                <span className="text-gray-900">{User.name}</span>
               )}
             </div>
 
@@ -88,20 +80,20 @@ const Profile = () => {
                   className="border px-2 py-1 rounded-sm w-full max-w-xs"
                 />
               ) : (
-                <span className="text-gray-900">{user.email}</span>
+                <span className="text-gray-900">{User.email}</span>
               )}
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-gray-600 font-medium w-24">Registered:</span>
               <span className="text-gray-900">
-                {new Date(user.createdAt).toLocaleDateString()}
+                {new Date(User.createdAt).toLocaleDateString()}
               </span>
             </div>
 
             {editMode ? (
               <div className="flex justify-center mt-6">
-                  <button
+                <button
                   onClick={handleSave}
                   className="bg-green-500 text-white py-2 px-12 rounded-sm hover:bg-blue-700"
                 >
@@ -119,8 +111,6 @@ const Profile = () => {
               </div>
             )}
           </div>
-        ) : (
-          !error && <p className="text-center text-gray-600">Loading...</p>
         )}
       </div>
     </div>

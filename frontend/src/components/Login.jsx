@@ -1,14 +1,14 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import api from '../api/axios';
+import { UserData } from '../context/UserContext';
+import axios from 'axios';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useContext(AuthContext);
+  const { user, setUser } = useContext(UserData);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,18 +19,27 @@ const Login = () => {
     setError('');
 
     try {
-      const res = await api.post('/auth/login', form);
+      const res = await axios.post("http://localhost:5000/auth/login", form, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
 
       if (res.status === 200) {
+        console.log('Login successful');
+
         const { token, user } = res.data;
-        login({ token, ...user });  
+        setUser(user);
+        localStorage.setItem('token', token);
         navigate(location.state?.from || '/');
       }
-      
+
     } catch (err) {
       setError(err.response?.data?.msg || 'Login failed');
     }
   };
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-none">

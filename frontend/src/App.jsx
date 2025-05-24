@@ -6,28 +6,35 @@ import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Upload from "./components/Upload";
 import Navbar from './components/Navbar';
-import ProtectedRoute from './routes/ProtectedRoute';
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App = () => {
-  
   return (
-      <Router>
-        <Navbar/>
-        <Routes>
-          {/* checking under-developing routes */}
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/userfiles" element={<FilesPage />} />
+    <Router>
+      <Navbar/>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Template />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
 
-          {/* Public Routes */}
-          <Route path="/" element={<Template />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/upload" element={<Upload />} />
-
-          {/* Protected Routes */}
-          
-        </Routes>
-      </Router>
+        {/* Protected Routes */}
+        <Route path="/upload" element={
+            <Upload />
+        } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/files" element={
+          <ProtectedRoute>
+            <FilesPage />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </Router>
   );
 };
 

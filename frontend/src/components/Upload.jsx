@@ -4,14 +4,17 @@ import {
   FileText,
   Repeat,
   CloudUpload,
-  FileArchive
+  FileArchive,
+  User
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import api from '../api/axios';
+import { UserData } from '../context/UserContext';
+import axios from 'axios';
+
+const BASE_URL = "http://localhost:5000";
 
 const Upload = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useContext(UserData);
   const navigate = useNavigate();
   const location = useLocation();
   const initialFile = location.state?.file || null;
@@ -28,6 +31,7 @@ const Upload = () => {
  
   const fileInputRef = useRef();
 
+  const id = user?._id || null;
   
   useEffect(() => {
     if (initialFile) {
@@ -73,17 +77,14 @@ const Upload = () => {
       formData.append('file', file);
       formData.append('fileName', fileName);
       
-      // Single request to compress file
-      const response = await api.post('/files/compress', formData, {
+      const response = await axios.post(`${BASE_URL}files/compress/${id}`, formData, {
         headers: { 
           'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${user.token}` // Add auth token
         }
       });
 
       if (response.data && response.data.compressedSize) {
         setCompressedSize(response.data.compressedSize);
-        // Update file with compressed version if returned
         if (response.data.file) {
           setFile(new Blob([response.data.file], { type: file.type }));
         }
@@ -115,17 +116,14 @@ const Upload = () => {
       formData.append('file', file);
       formData.append('fileName', fileName);
       
-      // Single request to encrypt file
-      const response = await api.post('/files/encrypt', formData, {
+      const response = await axios.post(`${BASE_URL}/files/encrypt/${id}`, formData, {
         headers: { 
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${user.token}` // Add auth token
+          'Content-Type': 'multipart/form-data'
         }
       });
 
       if (response.data && response.data.success) {
         setEncrypted(true);
-        // Update file with encrypted version if returned
         if (response.data.file) {
           setFile(new Blob([response.data.file], { type: file.type }));
         }
@@ -159,10 +157,9 @@ const Upload = () => {
       formData.append('compressed', Boolean(compressedSize));
       formData.append('encrypted', encrypted);
 
-      const response = await api.post('/files/upload', formData, {
+      const response = await axios.post(`${BASE_URL}/files/upload/${id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${user.token}` // Add auth token
+          'Content-Type': 'multipart/form-data'
         },
         onUploadProgress: (progressEvent) => {
           const progress = Math.round(

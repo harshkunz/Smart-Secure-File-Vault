@@ -1,14 +1,14 @@
 import { useState, useContext } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import api from '../api/axios';
+import { UserData } from '../context/UserContext';
+import axios from 'axios';
 
 const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useContext(AuthContext);
+  const { user, setUser } = useContext(UserData);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,11 +19,18 @@ const Register = () => {
     setError('');
 
     try {
-      const res = await api.post('/auth/register', form);
+      const res = await axios.post("http://localhost:5000/auth/register", form, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        withCredentials: true,
+      });
+      console.log('Registration successful');
 
-      if (res.status === 201 || res.status === 200){
+      if (res.status === 201 || res.status === 200) {
         const { token, user } = res.data;
-        login({ token, ...user });
+        setUser(user);
+        localStorage.setItem('token', token);
         navigate(location.state?.from || '/');
       }
 
