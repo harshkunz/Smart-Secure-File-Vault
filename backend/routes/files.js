@@ -11,7 +11,8 @@ const {
   compressFile,
   decompressFile,
   encryptFile,
-  decryptFile
+  decryptFile,
+  previewFile // Import the new controller function
 } = require('../controllers/fileController');
 
 
@@ -34,7 +35,8 @@ const upload = multer({
 // File operations
 router.post('/upload', auth, upload.single('file'), uploadFile);
 router.get('/', auth, getUserFiles);
-router.get('/:id', auth, getFile);
+router.get('/:id', auth, getFile);     // download file by ID
+router.get('/preview/:id', auth, previewFile); // Add this new route for preview
 router.delete('/:id', auth, deleteFile);
 
 // Compression operations

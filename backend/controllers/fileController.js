@@ -5,6 +5,7 @@ const CompressionService = require("../services/compress");
 const DecompressionService = require("../services/decompress");
 const EncryptionService = require("../services/encrypt");
 const DecryptionService = require("../services/decrypt");
+const mime = require('mime-types');
 
 // Upload File
 exports.uploadFile = async (req, res) => {
@@ -167,5 +168,40 @@ exports.decryptFile = async (req, res) => {
     res.json({ msg: "File decrypted successfully" });
   } catch (err) {
     res.status(500).json({ msg: err.message });
+  }
+};
+
+// Add this new controller function
+exports.previewFile = async (req, res) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    // Check if user has access to the file
+    if (file.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Get file path
+    const filePath = file.fileUrl;
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "File not found on server" });
+    }
+
+    // Get file mime type
+    const mimeType = mime.lookup(filePath) || 'application/octet-stream';
+
+    // Set headers for preview
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', 'inline; filename="' + file.filename + '"');
+
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+  } catch (err) {
+    console.error("Preview error:", err);
+    res.status(500).json({ message: "Error previewing file" });
   }
 };
