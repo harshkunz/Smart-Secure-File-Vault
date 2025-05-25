@@ -1,12 +1,5 @@
 import { useState, useRef, useEffect, useContext } from "react";
-import {
-  Lock,
-  FileText,
-  Repeat,
-  CloudUpload,
-  FileArchive,
-  User
-} from "lucide-react";
+import { FileText, Repeat, CloudUpload } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { UserData } from '../context/UserContext';
 import axios from 'axios';
@@ -21,17 +14,11 @@ const Upload = () => {
 
   const [file, setFile] = useState(initialFile);
   const [fileName, setFileName] = useState(initialFile?.name || "");
-  const [compressedSize, setCompressedSize] = useState(null);
-  const [encrypted, setEncrypted] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
-  const [isCompressing, setIsCompressing] = useState(false);
-  const [isEncrypting, setIsEncrypting] = useState(false);
  
   const fileInputRef = useRef();
-
-  const id = user?._id || null;
   
   useEffect(() => {
     if (initialFile) {
@@ -44,7 +31,6 @@ const Upload = () => {
     }
   }, [initialFile]);
 
-
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
     if (selected) {
@@ -54,87 +40,7 @@ const Upload = () => {
       }
       setFile(selected);
       setFileName(selected.name);
-      setCompressedSize(null);
-      setEncrypted(false);
       setError('');
-    }
-  };
-
-  const handleCompress = async () => {
-    if (!file) {
-      setError('Please select a file to compress');
-      return;
-    }
-    if (!user) {
-      setError('Please login to compress files');
-      return;
-    }
-    setIsCompressing(true);
-    setError('');
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('fileName', fileName);
-      
-      const response = await axios.post(`${BASE_URL}files/compress/${id}`, formData, {
-        headers: { 
-          'Content-Type': 'multipart/form-data',
-        }
-      });
-
-      if (response.data && response.data.compressedSize) {
-        setCompressedSize(response.data.compressedSize);
-        if (response.data.file) {
-          setFile(new Blob([response.data.file], { type: file.type }));
-        }
-      } else {
-        throw new Error('Compression failed');
-      }
-    } catch (err) {
-      console.error('Compression error:', err);
-      setError(err.response?.data?.message || 'Compression failed');
-    } finally {
-      setIsCompressing(false);
-    }
-  };
-
-  const handleEncrypt = async () => {
-    if (!file) {
-      setError('Please select a file to encrypt');
-      return;
-    }
-    if (!user) {
-      setError('Please login to encrypt files');
-      return;
-    }
-    setIsEncrypting(true);
-    setError('');
-    
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('fileName', fileName);
-      
-      const response = await axios.post(`${BASE_URL}/files/encrypt/${id}`, formData, {
-        headers: { 
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      if (response.data && response.data.success) {
-        setEncrypted(true);
-        if (response.data.file) {
-          setFile(new Blob([response.data.file], { type: file.type }));
-        }
-      } else {
-        throw new Error('Encryption failed');
-      }
-    } catch (err) {
-      console.error('Encryption error:', err);
-      setError(err.response?.data?.message || 'Encryption failed');
-    } finally {
-      setIsEncrypting(false);
     }
   };
 
@@ -154,13 +60,14 @@ const Upload = () => {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('fileName', fileName);
-      formData.append('compressed', Boolean(compressedSize));
-      formData.append('encrypted', encrypted);
+      formData.append('userId', user._id);
 
-      const response = await axios.post(`${BASE_URL}/files/upload/${id}`, formData, {
+      const response = await axios.post(`${BASE_URL}/files/upload`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${user.token}`
         },
+        withCredentials: true,
         onUploadProgress: (progressEvent) => {
           const progress = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -168,15 +75,23 @@ const Upload = () => {
           setUploadProgress(progress);
         }
       });
+      console.log('Upload response:', response.data);
 
-      if (response.data && response.data.success) {
+      if (response.data) {
+        setFile(null);
+        setFileName('');
         navigate('/files');
       } else {
         throw new Error(response.data?.message || 'Upload failed');
       }
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err.response?.data?.message || 'Upload failed');
+      if (err.response?.status === 403) {
+        setError('Session expired. Please login again.');
+        navigate('/login');
+      } else {
+        setError(err.response?.data?.message || 'Upload failed');
+      }
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -212,18 +127,6 @@ const Upload = () => {
               <span className="w-24 font-medium">Size:</span>
               <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
             </div>
-            {compressedSize && (
-              <div className="flex items-center text-green-600 pt-2">
-                <span className="w-24 font-medium">Compressed:</span>
-                <span>{(compressedSize / (1024 * 1024)).toFixed(2)} MB</span>
-              </div>
-            )}
-            {encrypted && (
-              <div className="flex items-center text-green-600">
-                <span className="w-24 font-medium">Encrypted:</span>
-                <span>Success</span>
-              </div>
-            )}
           </div>
         ) : (
           <p className="text-center text-sm text-red-500">No file selected.</p>
@@ -245,35 +148,11 @@ const Upload = () => {
         )}
 
         <div className="mt-6 space-y-3">
-          <div className="flex gap-2 justify-center pt-2">
-            <button
-              onClick={handleCompress}
-              className={`flex items-center gap-2 ${
-                isCompressing ? 'bg-gray-500' : 'bg-yellow-500 hover:bg-blue-700'
-              } text-white px-3 py-2 rounded-sm`}
-              disabled={ uploading || isCompressing}
-            >
-              <FileArchive size={18} />
-              {isCompressing ? 'Compressing...' : 'Compress'}
-            </button>
-
-            <button
-              onClick={handleEncrypt}
-              className={`flex items-center gap-2 ${
-                isEncrypting ? 'bg-gray-500' : 'bg-red-500 hover:bg-blue-700'
-              } text-white px-3 py-2 rounded-sm`}
-              disabled={ uploading || isEncrypting}
-            >
-              <Lock size={18} />
-              {isEncrypting ? 'Encrypting...' : 'Encrypt'}
-            </button>
-          </div>
-
           <div className="flex justify-center pt-2">
             <button
               onClick={() => fileInputRef.current.click()}
               className="flex items-center gap-2 bg-gray-400 hover:bg-blue-700 text-white px-4 py-2 rounded-sm"
-              disabled={uploading || isCompressing || isEncrypting}
+              disabled={uploading}
             >
               <Repeat size={18} /> Re-upload
             </button>
@@ -290,7 +169,7 @@ const Upload = () => {
             <button
               onClick={handleUpload}
               className="flex items-center gap-2 bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded-sm"
-              disabled={ uploading || isCompressing || isEncrypting}
+              disabled={uploading}
             >
               <CloudUpload size={18} />
               {uploading ? "Uploading..." : "Upload to Cloud"}
