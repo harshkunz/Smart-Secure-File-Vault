@@ -15,7 +15,7 @@ const FileSchema = new mongoose.Schema({
     required: true,
   },
   fileType: {
-    type: String,  // e.g., 'pdf', 'jpg', 'docx'
+    type: String,
     required: true,
   },
   fileUrl: {
@@ -30,6 +30,6 @@ const FileSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("File", FileSchema);

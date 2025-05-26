@@ -7,12 +7,12 @@ module.exports = async (req, res, next) => {
   
   const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
   if(!token) {
-    return res.status(401).json({ msg: 'Unauthorized' });
+    return res.status(401).json({ msg: 'Unauthorized access' });
   }
 
   const isBlacklisted = await BlacklistedToken.findOne({ token : token });
   if (isBlacklisted) {
-    return res.status(401).json({ message: 'Unauthorized access login again!' });
+    return res.status(401).json({ message: 'Unauthorized access expired token' });
   }
 
   try {
@@ -23,6 +23,6 @@ module.exports = async (req, res, next) => {
     return next();
 
   } catch (err) {
-    return res.status(403).json({ msg: 'Unauthorized' });
+    return res.status(403).json({ msg: 'Unauthorized access' });
   }
 };

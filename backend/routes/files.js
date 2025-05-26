@@ -12,7 +12,7 @@ const {
   decompressFile,
   encryptFile,
   decryptFile,
-  previewFile // Import the new controller function
+  previewFile
 } = require('../controllers/fileController');
 
 

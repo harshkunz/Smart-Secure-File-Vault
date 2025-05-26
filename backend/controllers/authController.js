@@ -13,6 +13,7 @@ exports.register = async (req, res) => {
     const user = await User.create({ name, email, password: hashed });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {expiresIn: '24h'});
+    res.cookie('token', token);
     res.status(201).json({success:true, token, user });
 
   } catch (err) {
@@ -44,11 +45,11 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-  res.clearCookie('token');
   try {
 
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
     await BlacklistedToken.create({ token });
+    res.clearCookie('token'); 
     res.status(200).json({ msg: "Logout user" });
 
   } catch (err) {
