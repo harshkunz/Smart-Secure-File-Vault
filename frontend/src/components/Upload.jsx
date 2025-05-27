@@ -121,7 +121,7 @@ const Upload = () => {
         </div>
 
         {/* Upload Card */}
-        <div className= "border-2 border-dotted border-gray-400 p-6 pt-5  rounded-lg text-center space-y-6 transition-all duration-200">
+        <div className= "border-2 border-dotted border-gray-400 py-6 px-2 pt-5  rounded-lg text-center space-y-6 transition-all duration-200">
 
           <div className="flex justify-center mb-4">
             <div className="w-32 h-32 flex items-center justify-center transition">
