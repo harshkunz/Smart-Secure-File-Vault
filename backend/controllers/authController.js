@@ -46,7 +46,6 @@ exports.login = async (req, res) => {
 
 exports.logout = async (req, res) => {
   try {
-
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
     await BlacklistedToken.create({ token });
     res.clearCookie('token'); 
