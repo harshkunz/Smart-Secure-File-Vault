@@ -49,12 +49,12 @@ const Dashboard = () => {
     <div className="pt-20 min-h-screen relative bg-black">
       {/* Background layer */}
       <div
-        className="h-full w-full absolute inset-0 bg-cover bg-center filter opacity-40"
+        className="h-full w-full absolute inset-0 bg-cover bg-center filter opacity-30"
         style={{ backgroundImage: `url(${cloud})` }}
       />
 
       {/* Foreground Content */}
-      <div className="relative w-full max-w-screen-lg mx-auto px-4 sm:px-16 md:px-16 lg:px-32 text-white">
+      <div className="relative w-full max-w-screen-lg mx-auto px-5 sm:px-16 md:px-16 lg:px-32 text-white">
         <div>
           <h1 className="text-3xl sm:text-4xl md:text-4xl lg:px-5xl font-medium mb-2 pt-12">Done! You're on Dashboard</h1>
           <h2 className="text-base sm:text-lg md:text-lg text-gray-300 mb-6 pb-4">Please follow the conditions below</h2>

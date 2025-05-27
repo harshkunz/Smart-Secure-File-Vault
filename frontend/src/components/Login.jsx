@@ -50,7 +50,6 @@ const Login = () => {
         <h2 className="text-2xl font-medium mb-4 text-center">Login</h2>
 
         {error && <p className="text-red-500 mb-2">{error}</p>}
-
         <div className="mb-4">
           <label htmlFor="email" className="block font-medium mb-1">Email</label>
           <input
