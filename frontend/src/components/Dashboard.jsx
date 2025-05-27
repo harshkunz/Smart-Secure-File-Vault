@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import fileImage from "../assets/fileImage.png";
+import fi from "../assets/fi.png";
+import cloud from "../assets/cloud.jpg";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
@@ -45,51 +46,61 @@ const Dashboard = () => {
   const triggerFileInput = () => fileInputRef.current?.click();
 
   return (
-    <div className="p-8 max-w-xl mx-auto">
-      <h1 className="text-4xl font-medium mb-2 pt-8">Done! You're on Dashboard</h1>
-      <h2 className="text-lg text-gray-600 mb-6 pt-2">Please follow the conditions below</h2>
+    <div className="pt-20 min-h-screen relative bg-black">
+      {/* Background layer */}
+      <div
+        className="h-full w-full absolute inset-0 bg-cover bg-center filter opacity-40"
+        style={{ backgroundImage: `url(${cloud})` }}
+      />
 
-      <div className={`border border-dashed ${dragActive ? 'border-green-500 bg-green-50' : 'border-gray-400'}
-        p-6 rounded-lg text-center space-y-6 transition-all duration-200`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-      >
-
-        <div className="flex justify-center">
-          <img src={fileImage} alt="File" className="mx-auto h-44" />
+      {/* Foreground Content */}
+      <div className="relative w-full max-w-screen-lg mx-auto px-4 sm:px-16 md:px-16 lg:px-32 text-white">
+        <div>
+          <h1 className="text-3xl sm:text-4xl md:text-4xl lg:px-5xl font-medium mb-2 pt-12">Done! You're on Dashboard</h1>
+          <h2 className="text-base sm:text-lg md:text-lg text-gray-300 mb-6 pb-4">Please follow the conditions below</h2>
         </div>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-          accept="*/*"
-        />
+        <div
+          className={`border-2 border-dotted ${dragActive ? "border-green-500 bg-green-50" : "border-gray-400"}
+            p-6 rounded-lg text-center space-y-6 transition-all duration-200`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+        >
+          <div className="flex justify-center">
+            <img src={fi} alt="File" className="mx-auto h-32 sm:h-44 mb-1 mt-1" />
+          </div>
 
-        <button
-          onClick={triggerFileInput}
-          className={`flex items-center gap-2 justify-center bg-green-500
-              hover:bg-blue-700 text-white px-4 py-4 mb-8 rounded-full mx-auto 
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
+            accept="*/*"
+          />
+
+          <button
+            onClick={triggerFileInput}
+            className={`flex items-center gap-2 justify-center bg-gray-500 hover:bg-blue-600 text-white px-4 py-4 mb-8 rounded-full mx-auto 
               transition-shadow duration-200 ease-in-out 
               hover:shadow-[0_0_20px_6px_rgba(59,130,246,0.6)]
-              ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={loading}
-        >
-          <Plus size={30} />
-        </button>
+          >
+            <Plus size={30} />
+          </button>
 
-        {loading && (
-          <div className="relative w-full h-2 bg-gray-200 rounded mt-6 mb-6 overflow-hidden">
-            <div className="absolute h-full bg-purple-300 animate-loading-bar" />
+          {loading && (
+            <div className="relative w-full h-2 rounded mt-7 mb-6 overflow-hidden">
+              <div className="absolute h-full bg-white animate-loading-bar" />
+            </div>
+          )}
+
+          <div className="py-2">
+            <p className="text-white">Drag & drop or choose your file</p>
+            <p className="text-gray-300 text-sm mt-1">Maximum file size: 50 MB</p>
           </div>
-        )}
-
-        <div className="text-gray-500 py-2">
-          <p>Drag & drop or choose your file</p>
-          <p className="text-sm mt-1">Maximum file size: 50 MB</p>
         </div>
       </div>
     </div>
