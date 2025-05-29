@@ -13,6 +13,7 @@ import {
   Unlock
 } from "lucide-react";
 import { UserData } from "../context/UserContext";
+import c1 from '../assets/c1.jpg';
 import axios from "axios";
 
 const BASE_URL = "http://localhost:5000";
@@ -274,157 +275,133 @@ const FilesPage = () => {
     return <FileText size={40} />;
   };
 
+  const LoadingSpinner = () => (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white" />
+    </div>
+  );
+
   return (
-    <div className="p-4 sm:px-8 lg:px-16">
-      <div className="mb-4 px-8 py-2 flex gap-2">
-        <input
-          type="text"
-          placeholder="Search files..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-4 py-2 rounded-full w-full hover:bg-purple-100 focus:outline-none focus:ring-1 focus:ring-blue-400"
+    <div className="pt-20 min-h-screen relative bg-black">
+      {/* Background layer */}
+        <div
+          className="h-full w-full absolute inset-0 bg-cover bg-center filter opacity-50"
+          style={{ backgroundImage: `url(${c1})` }}
         />
-        <button className="bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded-full">
-          <Search size={18} />
-        </button>
+      {/* Foreground Content */}
+      <div className="relative text-white p-4 sm:px-8 lg:px-16">
+        <div className="mb-6 px-8 flex gap-4 items-center">
+          <input
+            type="text"
+            placeholder="Search files..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border-2 border-gray-400 bg-transparent px-4 py-2 rounded-full w-full text-base
+                      transition-shadow duration-200 ease-in-out
+                      focus:outline-none hover:shadow-[0_0_20px_6px_rgba(156,163,175,0.6)]"
+          />
+          <button className="border-2 hover:bg-gray-700 text-white p-3 rounded-full transition">
+            <Search size={18} />
+          </button>
+        </div>
+
+        {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+
+        {loading ? (
+          <div className="text-center text-lg font-medium">Loading...</div>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold text-center mb-6">Your Files</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+              {files
+                .filter((file) =>
+                  file.filename.toLowerCase().includes(search.toLowerCase())
+                )
+                .map((file) => (
+                  <div
+                    key={file._id}
+                    className="border-2 border-gray-400 p-5 transition flex flex-col items-center text-center
+                                transition-all duration-200 transition-shadow duration-200 ease-in-out
+                                hover:shadow-[0_0_20px_6px_rgba(156,163,175,0.6)]"
+                  >
+                    <div className="border-2 border-gray-400 p-4 h-16 w-16 flex items-center justify-center rounded-full mb-4 transition">
+                      {getIcon(file.filename)}
+                    </div>
+
+                    <span className="font-semibold text-white">{file.filename}</span>
+                    {file.compressed && <span className="text-yellow-600 text-sm">Compressed</span>}
+                    {file.encrypted && <span className="text-red-600 text-sm">Encrypted</span>}
+
+                    {(downloadingFile === file._id || previewingFile === file._id || deletingFile === file._id || compressingFile === file._id || encryptingFile === file._id) && (
+                      <span className="text-sm text-gray-600 mt-1">
+                        {downloadingFile === file._id && "Downloading..."}
+                        {previewingFile === file._id && "Opening preview..."}
+                        {deletingFile === file._id && "Deleting..."}
+                        {compressingFile === file._id && (file.compressed ? "Decompressing..." : "Compressing...")}
+                        {encryptingFile === file._id && (file.encrypted ? "Decrypting..." : "Encrypting...")}
+                      </span>
+                    )}
+
+                    <div className="flex flex-wrap gap-2 justify-center mt-4">
+                      {/* Preview */}
+                      <button
+                        onClick={() => handlePreview(file)}
+                        className="bg-gray-700 border-2 hover:bg-transparent text-white p-2 rounded-full relative transition"
+                        disabled={processing && activeFile === file._id}
+                      >
+                        {previewingFile === file._id ? <LoadingSpinner /> : <Eye size={20} />}
+                      </button>
+
+                      {/* Download */}
+                      <button
+                        onClick={() => handleDownload(file)}
+                        className="bg-green-700 border-2 hover:bg-transparent text-white p-2 rounded-full relative transition"
+                        disabled={processing && activeFile === file._id}
+                      >
+                        {downloadingFile === file._id ? <LoadingSpinner /> : <Download size={20} />}
+                      </button>
+
+                      {/* Compress */}
+                      <button
+                        onClick={() => handleCompression(file)}
+                        className={`${file.compressed ? "bg-yellow-500" : "bg-blue-700"} border-2 hover:bg-transparent text-white p-2 rounded-full relative transition`}
+                        disabled={processing && activeFile === file._id}
+                      >
+                        {compressingFile === file._id ? <LoadingSpinner /> : <FileArchive size={20} />}
+                      </button>
+
+                      {/* Encrypt */}
+                      <button
+                        onClick={() => handleEncryption(file)}
+                        className={`${file.encrypted ? "bg-blue-500" : "bg-orange-700"} border-2 hover:bg-transparent text-white p-2 rounded-full relative transition`}
+                        disabled={processing && activeFile === file._id}
+                      >
+                        {encryptingFile === file._id ? <LoadingSpinner /> : file.encrypted ? <Unlock size={20} /> : <Lock size={20} />}
+                      </button>
+
+                      {/* Delete */}
+                      <button
+                        onClick={() => handleDelete(file._id)}
+                        className="bg-red-700 border-2 hover:bg-transparent text-white p-2 rounded-full relative transition"
+                        disabled={processing && activeFile === file._id}
+                      >
+                        {deletingFile === file._id ? <LoadingSpinner /> : <Trash2 size={20} />}
+                      </button>
+
+                      {/* Share */}
+                      <button
+                        className="bg-purple-700 border-2 hover:bg-transparent text-white p-2 rounded-full relative transition"
+                        disabled={processing && activeFile === file._id}
+                      >
+                        <Share2 size={20} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
       </div>
-
-      {error && <div className="text-red-500 text-center mb-4">{error}</div>}
-
-      {loading ? (
-        <div className="text-center">Loading...</div>
-      ) : (
-        <>
-          <h2 className="text-2xl font-semibold text-center mb-4">Your Files</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 px-8 py-2">
-            {files
-              .filter((file) =>
-                file.filename.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((file) => (
-                <div
-                  key={file._id}
-                  className="border rounded p-4 flex flex-col items-center text-center shadow rounded-lg hover:bg-purple-100"
-                >
-                  <div className="border-2 p-8 mt-4 h-16 mb-4 flex items-center justify-center rounded-full hover:bg-green-200">
-                    {getIcon(file.filename)}
-                  </div>
-                  <span className="font-medium">{file.filename}</span>
-                  {file.compressed && <span className="text-yellow-600 text-sm">Compressed</span>}
-                  {file.encrypted && <span className="text-red-600 text-sm">Encrypted</span>}
-                  {downloadingFile === file._id && (
-                    <span className="text-sm text-green-600 mt-1">
-                      Downloading...
-                    </span>
-                  )}
-                  {previewingFile === file._id && (
-                    <span className="text-sm text-gray-600 mt-1">
-                      Opening preview...
-                    </span>
-                  )}
-                  {deletingFile === file._id && (
-                    <span className="text-sm text-red-600 mt-1">
-                      Deleting...
-                    </span>
-                  )}
-                  {compressingFile === file._id && (
-                    <span className="text-sm text-yellow-600 mt-1">
-                      {file.compressed ? 'Decompressing...' : 'Compressing...'}
-                    </span>
-                  )}
-                  {encryptingFile === file._id && (
-                    <span className="text-sm text-red-600 mt-1">
-                      {file.encrypted ? 'Decrypting...' : 'Encrypting...'}
-                    </span>
-                  )}
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      className="bg-gray-300 mx-1 hover:bg-blue-600 text-black text-sm px-2 py-1 rounded-sm relative"
-                      onClick={() => handlePreview(file)}
-                      disabled={processing && activeFile === file._id}
-                    >
-                      {previewingFile === file._id ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-300">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-600"></div>
-                        </div>
-                      ) : (
-                        <Eye size={20} />
-                      )}
-                    </button>
-                    <button
-                      className="bg-green-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm relative"
-                      onClick={() => handleDownload(file)}
-                      disabled={processing && activeFile === file._id}
-                    >
-                      {downloadingFile === file._id ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-green-500">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
-                        </div>
-                      ) : (
-                        <Download size={20} />
-                      )}
-                    </button>
-                    {/* Compression button */}
-                    <button
-                      onClick={() => handleCompression(file)}
-                      className={`mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm relative ${
-                        file.compressed ? 'bg-yellow-500' : 'bg-blue-300'
-                      }`}
-                      disabled={processing && activeFile === file._id}
-                    >
-                      {compressingFile === file._id ? (
-                        <div className={`absolute inset-0 flex items-center justify-center ${
-                          file.compressed ? 'bg-yellow-500' : 'bg-blue-300'
-                        }`}>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
-                        </div>
-                      ) : (
-                        <FileArchive size={20} />
-                      )}
-                    </button>
-                    {/* Encryption button */}
-                    <button
-                      onClick={() => handleEncryption(file)}
-                      className={`mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm relative ${
-                        file.encrypted ? 'bg-blue-500' : 'bg-red-500'
-                      }`}
-                      disabled={processing && activeFile === file._id}
-                    >
-                      {encryptingFile === file._id ? (
-                        <div className={`absolute inset-0 flex items-center justify-center ${
-                          file.encrypted ? 'bg-blue-500' : 'bg-red-500'
-                        }`}>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
-                        </div>
-                      ) : (
-                        file.encrypted ? <Unlock size={20} /> : <Lock size={20} />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(file._id)}
-                      className="bg-red-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm relative"
-                      disabled={processing && activeFile === file._id}
-                    >
-                      {deletingFile === file._id ? (
-                        <div className="absolute inset-0 flex items-center justify-center bg-red-500">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white"></div>
-                        </div>
-                      ) : (
-                        <Trash2 size={20} />
-                      )}
-                    </button>
-                    <button
-                      className="bg-purple-500 mx-1 hover:bg-blue-600 text-white text-sm px-2 py-1 rounded-sm"
-                      disabled={processing && activeFile === file._id}
-                    >
-                      <Share2 size={20} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </>
-      )}
     </div>
   );
 };
