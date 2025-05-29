@@ -1,5 +1,8 @@
 import { useState, useContext } from "react";
 import { UserData } from '../context/UserContext';
+import cloud from "../assets/cloud.jpg";
+import { RiEditLine } from "react-icons/ri";
+import { TiTickOutline } from "react-icons/ti";
 import axios from 'axios';
 
 const BASE_URL = "http://localhost:5000";
@@ -43,75 +46,90 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Profile</h2>
+    <div className="pt-20 min-h-screen relative bg-black">
+      {/* Background layer */}
+      <div
+        className="h-full w-full absolute inset-0 bg-cover bg-center filter opacity-30"
+        style={{ backgroundImage: `url(${cloud})` }}
+      />
 
-        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-        {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
+      {/* Foreground Content */}
+      <div className="relative py-10 w-full max-w-screen-lg mx-auto px-5 sm:px-32 md:px-46 lg:px-64">
+        <div className="text-white items-center text-center">
+          <h2 className="text-3xl sm:text-4xl md:text-4xl font-medium mb-2 pt-12">
+            Profile
+          </h2>
+          <h3 className="text-base sm:text-lg md:text-lg text-gray-300 mb-6 pb-4">
+            View or edit your details
+          </h3>
+        </div>
 
-        {!User ? (
-          <p className="text-center text-red-500">Please login to view profile</p>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 font-medium w-24">Name:</span>
-              {editMode ? (
-                <input
-                  type="text"
-                  name="name"
-                  value={editableUser.name}
-                  onChange={handleChange}
-                  className="border px-2 py-1 rounded-sm w-full max-w-xs"
-                />
-              ) : (
-                <span className="text-gray-900">{User.name}</span>
-              )}
-            </div>
+        {/* Profile Card */}
+        <div className="border-2 border-gray-400 py-6 px-2 pt-8 text-center space-y-6 transition-all duration-200 bg-black bg-opacity-50 transition-shadow duration-200 ease-in-out hover:shadow-[0_0_20px_6px_rgba(156,163,175,0.6)] w-full max-w-md mx-auto">
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 font-medium w-24">Email:</span>
-              {editMode ? (
-                <input
-                  type="email"
-                  name="email"
-                  value={editableUser.email}
-                  onChange={handleChange}
-                  className="border px-2 py-1 rounded-sm w-full max-w-xs"
-                />
-              ) : (
-                <span className="text-gray-900">{User.email}</span>
-              )}
-            </div>
+          {error && <p className="text-red-400 text-center text-sm">{error}</p>}
+          {success && <p className="text-green-500 text-center text-sm">{success}</p>}
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 font-medium w-24">Registered:</span>
-              <span className="text-gray-900">
-                {new Date(User.createdAt).toLocaleDateString()}
-              </span>
-            </div>
+          {!User ? (
+            <p className="text-center text-red-400 text-sm">Please login to view profile</p>
+          ) : (
+            <div className="space-y-4 text-white">
+              <div className="flex items-center gap-8 px-4">
+                <span className="text-gray-300 font-medium w-24">Name</span>
+                {editMode ? (
+                  <input
+                    type="text"
+                    name="name"
+                    value={editableUser.name}
+                    onChange={handleChange}
+                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 w-full max-w-xs py-2 pl-3"
+                  />
+                ) : (
+                  <span>{User.name}</span>
+                )}
+              </div>
 
-            {editMode ? (
-              <div className="flex justify-center mt-6">
+              <div className="flex items-center gap-8 px-4">
+                <span className="text-gray-300 font-medium w-24">Email</span>
+                {editMode ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={editableUser.email}
+                    onChange={handleChange}
+                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 w-full max-w-xs py-2 pl-3"
+                  />
+                ) : (
+                  <span>{User.email}</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-8 px-4">
+                <span className="text-gray-300 font-medium w-24">Joined at</span>
+                {editMode ? (
+                  <input
+                    type="email"
+                    name="email"
+                    value={new Date(User.createdAt).toLocaleDateString()}
+                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 w-full max-w-xs py-2 pl-3"
+                  />
+                ) : (
+                  <span>{new Date(User.createdAt).toLocaleDateString()}</span>
+                )}
+              </div>
+
+              <div className="flex justify-center pt-2">
                 <button
-                  onClick={handleSave}
-                  className="bg-green-500 text-white py-2 px-12 rounded-sm hover:bg-blue-700"
+                  onClick={editMode ? handleSave : () => setEditMode(true)}
+                  className="flex items-center border gap-2 hover:bg-white hover:text-black text-white px-6 py-2 transition"
                 >
-                  Save
+                  {!editMode ? <RiEditLine size={20}/> : ""}
+                  {editMode ? "Save" : "Edit"}
                 </button>
               </div>
-            ) : (
-              <div className="flex justify-center mt-6">
-                <button
-                  onClick={() => setEditMode(true)}
-                  className="bg-green-500 text-white py-2 px-12 rounded-sm hover:bg-blue-700"
-                >
-                  Edit
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

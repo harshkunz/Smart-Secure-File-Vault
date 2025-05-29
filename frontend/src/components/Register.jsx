@@ -40,17 +40,18 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-none">
+    <div className="flex justify-center items-center min-h-screen bg-black px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleSubmit}
-        className="bg-gray-200 p-6 shadow-sm w-full max-w-md"
+        className="border border-blue-300 p-6 sm w-full max-w-sm sm:max-w-md text-white bg-black 
+                    transition-shadow duration-200 ease-in-out hover:shadow-[0_0_20px_6px_rgba(59,130,246,0.6)]"
       >
         <h2 className="text-2xl font-medium mb-4 text-center">Register</h2>
 
         {error && <p className="text-red-500 mb-2">{error}</p>}
 
-        <div className="mb-4">
-          <label htmlFor="name" className="block font-medium mb-1">Name</label>
+        <div className="mb-4 p-3">
+          <label htmlFor="name" className="block font-medium mb-2">Name</label>
           <input
             type="text"
             id="name"
@@ -58,12 +59,12 @@ const Register = () => {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2 rounded-md"
+            className="w-full border-b bg-transparent px-3 py-1 hover:bg-white hover:bg-opacity-20 focus:outline-none"
           />
         </div>
 
-        <div className="mb-4">
-          <label htmlFor="email" className="block font-medium mb-1">Email</label>
+        <div className="mb-4 p-3">
+          <label htmlFor="email" className="block font-medium mb-2">Email</label>
           <input
             type="email"
             id="email"
@@ -71,12 +72,12 @@ const Register = () => {
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2 rounded-md"
+            className="w-full border-b bg-transparent px-3 py-1 hover:bg-white hover:bg-opacity-20 focus:outline-none"
           />
         </div>
 
-        <div className="mb-6">
-          <label htmlFor="password" className="block font-medium mb-1">Password</label>
+        <div className="mb-6 p-3">
+          <label htmlFor="password" className="block font-medium mb-2">Password</label>
           <input
             type="password"
             id="password"
@@ -84,23 +85,23 @@ const Register = () => {
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full border px-3 py-2 rounded-md"
+            className="w-full border-b bg-transparent px-3 py-1 hover:bg-white hover:bg-opacity-20 focus:outline-none"
           />
         </div>
 
         <div className="flex justify-center">
           <button
             type="submit"
-            className="bg-green-500 text-white py-2 px-12 rounded-sm hover:bg-blue-700"
+            className="border text-white py-2 px-12 hover:bg-white hover:text-black"
           >
             Register
           </button>
         </div>
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-5">
           <p className="text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:underline">
+            <Link to="/login" className="text-blue-500 hover:underline border-b p-1">
               Login
             </Link>
           </p>

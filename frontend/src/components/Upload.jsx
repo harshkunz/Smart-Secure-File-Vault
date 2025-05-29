@@ -115,13 +115,14 @@ const Upload = () => {
 
       {/* Foreground Content */}
       <div className="relative w-full max-w-screen-lg mx-auto px-5 sm:px-32 md:px-46 lg:px-64">
+        
         <div className="text-white items-center text-center">
           <h1 className="text-3xl sm:text-4xl md:text-4xl lg:px-5xl font-medium mb-2 pt-12">Upload files</h1>
           <h2 className="text-base sm:text-lg md:text-lg text-gray-300 mb-6 pb-4">Please follow the instructions below</h2>
         </div>
 
         {/* Upload Card */}
-        <div className= "border-2 border-dotted border-gray-400 py-6 px-2 pt-5  rounded-lg text-center space-y-6 transition-all duration-200">
+        <div className= "border-2 border-gray-400 py-6 px-2 pt-5 text-center space-y-6 transition-all duration-200 bg-black bg-opacity-50 transition-shadow duration-200 ease-in-out hover:shadow-[0_0_20px_6px_rgba(156,163,175,0.6)]">
 
           <div className="flex justify-center mb-4">
             <div className="w-32 h-32 flex items-center justify-center transition">
@@ -132,24 +133,25 @@ const Upload = () => {
           {file ? (
             <div className="space-y-3 text-sm text-white">
 
-              <div className="flex flex-col pt-2 border border-gray-500 rounded-lg py-3 mx-8">
-                <span className="w-24 font-medium text-gray-300 text-center mb-1 pl-1">NAME</span>
+              <div className="flex flex-col pt-2 py-3 mx-8">
+                <span className="w-24 font-medium text-gray-300 text-center mb-2 pl-1">NAME</span>
                 <div className="flex justify-center px-6">
                   <input
                     value={fileName}
                     onChange={(e) => setFileName(e.target.value)}
                     className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none 
-                              hover:bg-white hover:bg-opacity-30 
-                              w-full max-w-md py-1 pl-3"
+                              hover:bg-white hover:bg-opacity-20 
+                              w-full max-w-md py-2 pl-3"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center border border-gray-500 rounded-lg py-2 mx-8">
+              <div className="flex items-center py-2 mx-8">
                 <span className="w-24 font-medium text-gray-300">TYPE</span>
                 <span >{file.type || "Unknown"}</span>
               </div>
-              <div className="flex items-center border border-gray-500 rounded-lg py-2 mx-8">
+
+              <div className="flex items-center py-2 mx-8">
                 <span className="w-24 font-medium text-gray-300">SIZE</span>
                 <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
               </div>
@@ -174,8 +176,10 @@ const Upload = () => {
           )}
 
           {loading && (
-            <div className="relative w-full h-2 rounded mt-7 mb-6 overflow-hidden">
-              <div className="absolute h-full bg-white animate-loading-bar" />
+            <div className="mx-4">
+              <div className="relative w-full h-2 rounded mt-7 mb-6 overflow-hidden">
+                <div className="absolute h-full bg-white animate-loading-bar" />
+              </div>
             </div>
           )}
 
@@ -183,7 +187,7 @@ const Upload = () => {
             <div className="flex justify-center pt-2">
               <button
                 onClick={() => fileInputRef.current.click()}
-                className="flex items-center gap-2 bg-gray-600 hover:bg-white hover:text-black text-white px-4 py-2 rounded-md transition"
+                className="flex items-center gap-2 bg-gray-600 hover:bg-white hover:text-black text-white px-4 py-2 transition"
                 disabled={uploading || loading}
               >
                 <Repeat size={18} />
@@ -202,7 +206,7 @@ const Upload = () => {
             <div className="flex justify-center pt-2">
               <button
                 onClick={handleUpload}
-                className="flex items-center gap-2 bg-blue-500 hover:bg-white hover:text-black text-white px-4 py-2 mb-2 rounded-md transition"
+                className="flex items-center gap-2 hover:bg-white hover:text-black text-white px-4 py-2 mb-2 transition"
                 disabled={uploading}
               >
                 <CloudUpload size={18} />
@@ -212,9 +216,7 @@ const Upload = () => {
           </div>
         </div>
       </div>
-
-    </div>
-    
+    </div>  
   );
 };
 
