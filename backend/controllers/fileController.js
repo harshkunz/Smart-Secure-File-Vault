@@ -8,12 +8,7 @@ const DecryptionService = require("../services/decrypt");
 const mime = require('mime-types');
 const mongoose = require("mongoose");
 const { GridFSBucket, ObjectId } = require("mongodb");
-
-
-// default bucket name used by multer-gridfs-storage
-const bucket = new GridFSBucket(mongoose.connection.db, {
-  bucketName: "fs", 
-});
+const connectToDb = require('../db/db');
 
 
 // Upload File
@@ -54,8 +49,10 @@ exports.getFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied or file not exist" });
     }
 
-    const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "fs" });
+    const db = await connectToDb();
+    const bucket = new GridFSBucket(db, { bucketName: "fs" });
     const stream = bucket.openDownloadStream(new ObjectId(file.fileUrl));
+
 
     res.setHeader("Content-Disposition", `attachment; filename="${file.filename}"`);
     stream.pipe(res);
@@ -73,7 +70,8 @@ exports.deleteFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied or file not exist" });
     }
 
-    const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "fs" });
+    const db = await connectToDb();
+    const bucket = new GridFSBucket(db, { bucketName: "fs" });
 
     await bucket.delete(new ObjectId(file.fileUrl));
     await file.deleteOne();
@@ -92,8 +90,10 @@ exports.previewFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied or file not exist" });
     }
 
-    const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "fs" });
+    const db = await connectToDb();
+    const bucket = new GridFSBucket(db, { bucketName: "fs" });
     const stream = bucket.openDownloadStream(new ObjectId(file.fileUrl));
+
 
     const mimeType = mime.lookup(file.filename) || 'application/octet-stream';
     res.setHeader('Content-Type', mimeType);
