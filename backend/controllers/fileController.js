@@ -6,19 +6,28 @@ const DecompressionService = require("../services/decompress");
 const EncryptionService = require("../services/encrypt");
 const DecryptionService = require("../services/decrypt");
 const mime = require('mime-types');
+const mongoose = require("mongoose");
+const { GridFSBucket, ObjectId } = require("mongodb");
+
+
+// default bucket name used by multer-gridfs-storage
+const bucket = new GridFSBucket(mongoose.connection.db, {
+  bucketName: "fs", 
+});
+
 
 // Upload File
 exports.uploadFile = async (req, res) => {
   try {
-    const { mimetype, size, filename, path: filePath } = req.file;
+    const { filename, size, contentType, id } = req.file;
 
     const file = await File.create({
       userId: req.user._id,
       filename: filename,
       fileSize: size,
-      fileType: mimetype.split("/")[1],
-      fileUrl: filePath.replace(/\\/g, '/'),
-      encryptionStatus: true,
+      fileType: contentType,
+      fileUrl: id.toString(),  // GridFS file ID
+      encryptionStatus: false,
     });
 
     res.status(201).json({ msg: "File uploaded", file });
@@ -45,11 +54,16 @@ exports.getFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied or file not exist" });
     }
 
-    res.download(path.resolve(file.fileUrl), file.filename);
+    const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "fs" });
+    const stream = bucket.openDownloadStream(new ObjectId(file.fileUrl));
+
+    res.setHeader("Content-Disposition", `attachment; filename="${file.filename}"`);
+    stream.pipe(res);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
+
 
 // Delete file
 exports.deleteFile = async (req, res) => {
@@ -59,7 +73,9 @@ exports.deleteFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied or file not exist" });
     }
 
-    fs.unlinkSync(file.fileUrl);
+    const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "fs" });
+
+    await bucket.delete(new ObjectId(file.fileUrl));
     await file.deleteOne();
 
     res.json({ msg: "File deleted" });
@@ -67,7 +83,6 @@ exports.deleteFile = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
-
 
 // prveiew file
 exports.previewFile = async (req, res) => {
@@ -77,24 +92,15 @@ exports.previewFile = async (req, res) => {
       return res.status(403).json({ msg: "Access denied or file not exist" });
     }
 
-    // Get file path
-    const filePath = file.fileUrl;
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: "File not found on server" });
-    }
+    const bucket = new GridFSBucket(mongoose.connection.db, { bucketName: "fs" });
+    const stream = bucket.openDownloadStream(new ObjectId(file.fileUrl));
 
-    // Get file mime type
-    const mimeType = mime.lookup(filePath) || 'application/octet-stream';
-
-    // Set headers for preview
+    const mimeType = mime.lookup(file.filename) || 'application/octet-stream';
     res.setHeader('Content-Type', mimeType);
-    res.setHeader('Content-Disposition', 'inline; filename="' + file.filename + '"');
+    res.setHeader('Content-Disposition', `inline; filename="${file.filename}"`);
 
-    // Stream the file
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
+    stream.pipe(res);
   } catch (err) {
-    console.error("Preview error:", err);
     res.status(500).json({ message: "Error previewing file" });
   }
 };
