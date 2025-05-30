@@ -6,7 +6,6 @@ const DecompressionService = require("../services/decompress");
 const EncryptionService = require("../services/encrypt");
 const DecryptionService = require("../services/decrypt");
 const mime = require('mime-types');
-const mongoose = require("mongoose");
 const { GridFSBucket, ObjectId } = require("mongodb");
 const connectToDb = require('../db/db');
 
