@@ -4,6 +4,8 @@ import { UserData } from '../context/UserContext';
 import c1 from '../assets/c1.jpg';
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Register = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
@@ -20,7 +22,7 @@ const Register = () => {
     setError('');
 
     try {
-      const res = await axios.post("http://localhost:5000/auth/register", form, {
+      const res = await axios.post(`${BASE_URL}/auth/register`, form, {
         headers: {
           'Content-Type': 'application/json',
         },

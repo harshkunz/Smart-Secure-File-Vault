@@ -8,6 +8,8 @@ import { UserData } from '../context/UserContext';
 import logo from '../assets/logo.png';
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Navbar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { user, setUser } = useContext(UserData);
@@ -17,7 +19,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      await axios.get('http://localhost:5000/auth/logout', {
+      await axios.get(`${BASE_URL}/auth/logout`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,

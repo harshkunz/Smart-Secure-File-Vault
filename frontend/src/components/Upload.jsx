@@ -6,7 +6,7 @@ import { UserData } from '../context/UserContext';
 import cloud from '../assets/cloud.jpg';
 import axios from 'axios';
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Upload = () => {
   const { user } = useContext(UserData);

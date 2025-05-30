@@ -5,7 +5,7 @@ import { RiEditLine } from "react-icons/ri";
 import { TiTickOutline } from "react-icons/ti";
 import axios from 'axios';
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = () => {
   const { user: User, setUser: setUser } = useContext(UserData);
