@@ -58,15 +58,15 @@ A secure file management system with encryption, compression, and preview capabi
 
 ## Screenshots
 
-<img src="frontend/public/Screenshot 2025-05-29 214611.png" alt="Screenshot 1" height="200px" />
+<img src="frontend/public/Screenshot 2025-05-29 214611.png" alt="Screenshot 1" height="300px" />
 
-<img src="frontend/public/Screenshot 2025-05-29 214824.png" alt="Screenshot 2" height="200px" />
+<img src="frontend/public/Screenshot 2025-05-29 214824.png" alt="Screenshot 2" height="300px" />
 
-<img src="frontend/public/Screenshot 2025-05-29 214934.png" alt="Screenshot 3" height="200px" />
+<img src="frontend/public/Screenshot 2025-05-29 214934.png" alt="Screenshot 3" height="300px" />
 
-<img src="frontend/public/Screenshot 2025-05-29 215151.png" alt="Screenshot 4" height="200px" />
+<img src="frontend/public/Screenshot 2025-05-29 215151.png" alt="Screenshot 4" height="300px" />
 
-<img src="frontend/public/Screenshot 2025-05-30 111918.png" alt="Screenshot 5" height="200px" />
+<img src="frontend/public/Screenshot 2025-05-30 111918.png" alt="Screenshot 5" height="300px" />
 
 ## Installation
 
