@@ -82,7 +82,7 @@ const Profile = () => {
                     name="name"
                     value={editableUser.name}
                     onChange={handleChange}
-                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 w-full max-w-xs py-2 pl-3"
+                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 max-w-xs py-1 pl-3"
                   />
                 ) : (
                   <span>{User.name}</span>
@@ -97,7 +97,7 @@ const Profile = () => {
                     name="email"
                     value={editableUser.email}
                     onChange={handleChange}
-                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 w-full max-w-xs py-2 pl-3"
+                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 max-w-xs py-1 pl-3"
                   />
                 ) : (
                   <span>{User.email}</span>
@@ -111,7 +111,7 @@ const Profile = () => {
                     type="email"
                     name="email"
                     value={new Date(User.createdAt).toLocaleDateString()}
-                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 w-full max-w-xs py-2 pl-3"
+                    className="border-b border-gray-500 focus:border-white bg-transparent text-white focus:outline-none hover:bg-white hover:bg-opacity-20 max-w-xs py-1 pl-3"
                   />
                 ) : (
                   <span>{new Date(User.createdAt).toLocaleDateString()}</span>
