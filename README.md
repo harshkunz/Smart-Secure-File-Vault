@@ -54,7 +54,7 @@ A secure file management system with encryption, compression, and preview capabi
    - Secure file storage
    - Token-based authentication
    - Protected routes
-   - Blacklisted token management
+   - Blacklisted token management 
 
 ## Screenshots
 
