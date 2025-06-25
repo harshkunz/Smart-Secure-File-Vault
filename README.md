@@ -60,8 +60,6 @@ A secure file management system with encryption, compression, and preview capabi
 
 <img src="frontend/public/Screenshot 2025-05-29 214611.png" alt="Screenshot 1" height="400px" />
 
-<img src="frontend/public/Screenshot 2025-05-29 214824.png" alt="Screenshot 2" height="400px" />
-
 <img src="frontend/public/Screenshot 2025-05-29 214934.png" alt="Screenshot 3" height="400px" />
 
 <img src="frontend/public/Screenshot 2025-05-29 215151.png" alt="Screenshot 4" height="400px" />
